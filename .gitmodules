@@ -1,0 +1,4 @@
+[submodule "UAssetAPI"]
+	path = UAssetAPI
+	url = https://github.com/rirurin/UAssetAPI
+	branch = p3re-plg
