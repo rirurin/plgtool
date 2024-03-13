@@ -260,7 +260,7 @@ namespace plgtool.Uim
             Console.WriteLine($"{geometry.Count} {geomFactoryName}, {anims.Count} {animFactoryName}, {indices.Count} indices");
             return new FUimData(
                 Utils.GetValueMaybeNull<uint>(obj, "frameSkip"), Utils.GetValueMaybeNull<int>(obj, "frameNum"), Utils.GetValueMaybeNull<int>(obj, "vertexNum"),
-                Utils.GetValueMaybeNull<int>(obj, "polygonNum"), Utils.GetValueMaybeNull<int>(obj, "indexNum"), Utils.GetValueMaybeNull<int>(obj, "coordinate"),
+                Utils.GetValueMaybeNull<int>(obj, "polygonNum"), Utils.GetValueMaybeNull<int>(obj, "coordinate"), Utils.GetValueMaybeNull<int>(obj, "indexNum"),
                 Utils.GetValueMaybeNull<int>(obj, "geomFormat"), Utils.GetValueMaybeNull<int>(obj, "animFormat"), geometry, anims, indices, geomFactoryName, animFactoryName);
         }
 

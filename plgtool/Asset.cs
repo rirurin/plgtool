@@ -55,7 +55,7 @@ namespace plgtool
 
                         patchFile.BaseStream.Position = header.GraphDataOffset + header.GraphDataSize;
                         assetStream.Position = header.CookedHeaderSize;
-                        Console.WriteLine($"");
+
                         byte[] contentData = new byte[contentLength]; // write data
                         assetStream.Read(contentData, 0, (int)contentLength);
                         exportFile.Write(contentData);
