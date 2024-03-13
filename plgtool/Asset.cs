@@ -1,4 +1,5 @@
-﻿using plgtool.Imports;
+﻿using plgtool.Plg;
+using plgtool.Uim;
 using plgtool.Zen;
 using System.Text;
 using UAssetAPI;
@@ -9,33 +10,23 @@ using UAssetAPI.UnrealTypes;
 
 namespace plgtool
 {
-    public class Asset
+    public abstract class Asset
     {
         public UAsset asset;
-        public ArrayPropertyData plgDatas;
-        public List<PlgData> entries;
         public string exportFileName;
         public string patchFileName;
 
-        public Asset(string assetName, string patchName, string? exportName, List<PlgData> entries)
+        public Asset(string assetName, string patchName, string? exportName)
         {
             asset = new UAsset(assetName, EngineVersion.VER_UE4_27);
             patchFileName = patchName;
             if (exportName != null) exportFileName = exportName;
             else exportFileName = Path.Combine(Path.GetDirectoryName(patchName), Path.GetFileNameWithoutExtension(patchName) + "_MODIFIED" + Path.GetExtension(patchName));
-            var outPlgData = (asset.Exports[0] as NormalExport).Data[0] as StructPropertyData;
-            plgDatas = outPlgData.Value[0] as ArrayPropertyData;
-            this.entries = entries;
         }
 
         // Inject custom PLG data into cooked asset using UAssetAPI
         // (not using CUE4Parse because that's for datamining Fortnite :true:)
-        public void Inject()
-        {
-            plgDatas.Value = new PropertyData[entries.Count];
-            for (int i = 0; i < entries.Count; i++)
-                plgDatas.Value[i] = entries[i].Serialize(this);
-        }
+        public abstract void Inject();
         // Patch custom info into IO Store asset (what I did for Atlus Script Tools)
         public void Serialize()
         {
@@ -64,6 +55,7 @@ namespace plgtool
 
                         patchFile.BaseStream.Position = header.GraphDataOffset + header.GraphDataSize;
                         assetStream.Position = header.CookedHeaderSize;
+                        Console.WriteLine($"");
                         byte[] contentData = new byte[contentLength]; // write data
                         assetStream.Read(contentData, 0, (int)contentLength);
                         exportFile.Write(contentData);
@@ -79,5 +71,37 @@ namespace plgtool
             if (asset.ContainsNameReference(ustr)) return new FName(asset, asset.AddNameReference(ustr), 0);
             else return new FName(asset, asset.AddNameReference(ustr), 0);
         }
+    }
+
+    public class PlgAsset : Asset
+    {
+        public ArrayPropertyData plgDatas;
+        public List<PlgData> entries;
+
+        public PlgAsset(string assetName, string patchName, string? exportName, List<PlgData> entries) : base (assetName, patchName, exportName)
+        {
+            var outPlgData = (asset.Exports[0] as NormalExport).Data[0] as StructPropertyData;
+            plgDatas = outPlgData.Value[0] as ArrayPropertyData;
+            this.entries = entries;
+        }
+
+        public override void Inject()
+        {
+            plgDatas.Value = new PropertyData[entries.Count];
+            for (int i = 0; i < entries.Count; i++)
+                plgDatas.Value[i] = entries[i].Serialize(this);
+        }
+    }
+
+    public class UimAsset : Asset
+    {
+        public StructPropertyData rawUim;
+        public FUimData uimData;
+        public UimAsset(string assetName, string patchName, string? exportName, FUimData uimData) : base(assetName, patchName, exportName)
+        {
+            rawUim = (asset.Exports[0] as NormalExport).Data[0] as StructPropertyData;
+            this.uimData = uimData;
+        }
+        public override void Inject() => rawUim = uimData.Serialize(this);
     }
 }

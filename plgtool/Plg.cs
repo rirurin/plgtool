@@ -8,7 +8,7 @@ using UAssetAPI.PropertyTypes.Structs;
 using UAssetAPI.UnrealTypes;
 using Newtonsoft.Json.Linq;
 
-namespace plgtool.Imports
+namespace plgtool.Plg
 {
     public class PlgVertex
     {
@@ -94,8 +94,8 @@ namespace plgtool.Imports
         {
             var propOut = new ArrayPropertyData(asset.GetOrAddName("Colors"));
             propOut.ArrayType = asset.GetOrAddName("UInt32Property");
-            propOut.Value = GC.AllocateUninitializedArray<PropertyData>(Vertices.Count);
-            for (int i = 0; i < Vertices.Count; i++)
+            propOut.Value = GC.AllocateUninitializedArray<PropertyData>(Colors.Count);
+            for (int i = 0; i < Colors.Count; i++)
             {
                 var currValue = new UInt32PropertyData();
                 currValue.Value = Colors[i];
@@ -104,24 +104,7 @@ namespace plgtool.Imports
             return propOut;
         }
 
-        public UInt32PropertyData MakeUintProperty(Asset asset, string name, uint value)
-        {
-            var propOut = new UInt32PropertyData(asset.GetOrAddName(name));
-            propOut.Value = value;
-            return propOut;
-        }
-        public FloatPropertyData MakeFloatProperty(Asset asset, string name, float value)
-        {
-            var propOut = new FloatPropertyData(asset.GetOrAddName(name));
-            propOut.Value = value;
-            return propOut;
-        }
-        public NamePropertyData MakeNameProperty(Asset asset, string propName, string valueName)
-        {
-            var propOut = new NamePropertyData(asset.GetOrAddName(propName));
-            propOut.Value = asset.GetOrAddName(valueName);
-            return propOut;
-        }
+        
         public StructPropertyData Serialize(Asset asset)
         {
             var newPlg = new StructPropertyData(asset.GetOrAddName("PlgDatas"), asset.GetOrAddName("PlgPrimitiveData"));
@@ -129,11 +112,11 @@ namespace plgtool.Imports
                 MakeVertices(asset),
                 MakeIndices(asset),
                 MakeColors(asset),
-                MakeNameProperty(asset, "Name", Name),
-                MakeFloatProperty(asset, "MinX", MinX),
-                MakeFloatProperty(asset, "MinY", MinY),
-                MakeFloatProperty(asset, "MaxX", MaxX),
-                MakeFloatProperty(asset, "MaxY", MaxY),
+                Utils.MakeNameProperty(asset, "Name", Name),
+                Utils.MakeFloatProperty(asset, "MinX", MinX),
+                Utils.MakeFloatProperty(asset, "MinY", MinY),
+                Utils.MakeFloatProperty(asset, "MaxX", MaxX),
+                Utils.MakeFloatProperty(asset, "MaxY", MaxY),
             };
             return newPlg;
         }

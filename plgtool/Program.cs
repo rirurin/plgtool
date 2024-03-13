@@ -5,7 +5,8 @@ using UAssetAPI.PropertyTypes.Objects;
 using UAssetAPI.PropertyTypes.Structs;
 using UAssetAPI.UnrealTypes;
 using UAssetAPI;
-using plgtool.Imports;
+using plgtool.Plg;
+using plgtool.Uim;
 
 namespace plgtool
 {
@@ -27,18 +28,27 @@ namespace plgtool
             using (var inputReader = new StreamReader(inputFile, Encoding.UTF8))
             {
                 // Parse import PLG JSON
-                var inputObj = JArray.Parse(inputReader.ReadToEnd())[0]; // FModel exports JSONs as arrays
-                if (inputObj["Type"].ToString() != "PlgAsset")
+                var inputObj = JArray.Parse(inputReader.ReadToEnd())[0]; // FModel exports JSONs as arrays, so correct that
+                switch (inputObj["Type"].ToString())
                 {
-                    Console.WriteLine("Error: Import JSON must be a valid PLG");
-                    return;
+                    case "PlgAsset":
+                        List<PlgData> plgEntries = new();
+                        foreach (var plgEntry in inputObj["Properties"]["PlgData"]["PlgDatas"].Values<JObject>())
+                            plgEntries.Add(PlgData.FromJsonObject(plgEntry));
+                        var outPlg = new PlgAsset(args[1], args[2], args.Length == 4 ? args[3] : null, plgEntries);
+                        outPlg.Inject();
+                        outPlg.Serialize();
+                        break;
+                    case "UimAsset":
+                        var uimData = FUimData.FromJsonObject(inputObj["Properties"]["UimData"].Value<JObject>());
+                        var outUim = new UimAsset(args[1], args[2], args.Length == 4 ? args[3] : null, uimData);
+                        outUim.Inject();
+                        outUim.Serialize();
+                        break;
+                    default:
+                        Console.WriteLine("Error: Import JSON must be a valid PLG or UIM");
+                        break;
                 }
-                List<PlgData> plgEntries = new();
-                foreach (var plgEntry in inputObj["Properties"]["PlgData"]["PlgDatas"].Values<JObject>())
-                    plgEntries.Add(PlgData.FromJsonObject(plgEntry));
-                var outPlg = new Asset(args[1], args[2], args.Length == 4 ? args[3] : null, plgEntries);
-                outPlg.Inject();
-                outPlg.Serialize();
             }
         }
     }
