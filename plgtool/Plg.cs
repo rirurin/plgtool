@@ -68,6 +68,7 @@ namespace plgtool.Plg
         {
             var propOut = new ArrayPropertyData(asset.GetOrAddName("Vertices"));
             propOut.ArrayType = asset.GetOrAddName("StructProperty");
+            propOut.DummyStruct = new StructPropertyData();
             propOut.Value = GC.AllocateUninitializedArray<PropertyData>(Vertices.Count);
             for (int i = 0; i < Vertices.Count; i++)
             {
@@ -108,7 +109,8 @@ namespace plgtool.Plg
         public StructPropertyData Serialize(Asset asset)
         {
             var newPlg = new StructPropertyData(asset.GetOrAddName("PlgDatas"), asset.GetOrAddName("PlgPrimitiveData"));
-            newPlg.Value = new() {
+            newPlg.Value =
+            [
                 MakeVertices(asset),
                 MakeIndices(asset),
                 MakeColors(asset),
@@ -117,7 +119,7 @@ namespace plgtool.Plg
                 Utils.MakeFloatProperty(asset, "MinY", MinY),
                 Utils.MakeFloatProperty(asset, "MaxX", MaxX),
                 Utils.MakeFloatProperty(asset, "MaxY", MaxY),
-            };
+            ];
             return newPlg;
         }
     }
